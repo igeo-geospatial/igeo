@@ -107,7 +107,11 @@ class _ImageInputState extends State<ImageInput> {
       return;
     }
 
-    widget.onSelectImage(savedImage);
+    // Obtenha o arquivo real do AssetEntity
+    final file = await entity.file;
+    if (file != null && mounted) {
+      widget.onSelectImage(File(file.path)); // Usar o caminho da entidade salva
+    }
   }
 
   void removePicture(File file) async {
