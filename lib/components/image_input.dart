@@ -78,7 +78,7 @@ class _ImageInputState extends State<ImageInput> {
     final decodeImg = img.decodeImage(File(imageFile.path).readAsBytesSync());
     img.drawString(
       decodeImg!,
-      '${DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now())} - Lat: $lat - Long: $long',
+      '${DateFormat('yyyy-MM-dd – kk:mm').format(DateTime.now())}\nLat: $lat - Long: $long',
       x: 10,
       y: 10,
       font: img.arial24,
