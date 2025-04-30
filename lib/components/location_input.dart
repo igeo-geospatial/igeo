@@ -3,8 +3,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-
 import '../screens/map_screen.dart';
 import '../models/point.dart';
 
@@ -15,7 +13,7 @@ class LocationInput extends StatefulWidget {
 
 class _LocationInputState extends State<LocationInput> {
   late final MapController _mapController = MapController();
-  final Point _point = Point(); // Initialize here instead of widget
+  final Point _point = Point();
 
   Future<void> _handleLocationPermission() async {
     LocationPermission permission = await Geolocator.checkPermission();
@@ -33,19 +31,16 @@ class _LocationInputState extends State<LocationInput> {
   Future<void> _getCurrentUserLocation() async {
     try {
       await _handleLocationPermission();
-      await _checkConnectivityAndGPS();
       final position = await Geolocator.getCurrentPosition();
       _updatePosition(position.latitude, position.longitude);
-      print("****************************** " + position.latitude.toString());
     } catch (e) {
-      //_showErrorDialog(e.toString());
+      // _showLocationErrorDialog();
     }
   }
 
   Future<void> _selectOnMap() async {
     try {
       await _handleLocationPermission();
-      await _checkConnectivityAndGPS();
       final position = await Geolocator.getCurrentPosition();
       final initialPosition = LatLng(position.latitude, position.longitude);
 
@@ -60,17 +55,41 @@ class _LocationInputState extends State<LocationInput> {
         _updatePosition(selectedPosition.latitude, selectedPosition.longitude);
       }
     } catch (e) {
-      //_showErrorDialog(e.toString());
+      // _showLocationErrorDialog();
     }
+  }
+
+  void _showLocationErrorDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Location Error'),
+        content: const Text('Unable to get current location.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _showManualInputDialog();
+            },
+            child: const Text('Enter manually'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _updatePosition(double lat, double long) {
     final pointProvider = Provider.of<PointProvider>(context, listen: false);
     pointProvider.updateCoordinates(lat, long);
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _mapController.move(LatLng(lat, long), 13);
+    });
+
     setState(() {
       _point.changeCoordinates(lat, long);
-      _mapController.move(LatLng(lat, long), 13);
     });
   }
 
@@ -91,9 +110,19 @@ class _LocationInputState extends State<LocationInput> {
   }
 
   void _showManualInputDialog() {
-    final latController = TextEditingController();
-    final longController = TextEditingController();
+    final pointProvider = Provider.of<PointProvider>(context, listen: false);
+    final latController = TextEditingController(
+      text: pointProvider.lat?.toStringAsFixed(6) ?? '',
+    );
+    final longController = TextEditingController(
+      text: pointProvider.long?.toStringAsFixed(6) ?? '',
+    );
     final _formKey = GlobalKey<FormState>();
+
+    void _updateAndClose(BuildContext ctx, double lat, double long) {
+      _updatePosition(lat, long);
+      Navigator.pop(ctx);
+    }
 
     showDialog(
       context: context,
@@ -109,7 +138,8 @@ class _LocationInputState extends State<LocationInput> {
                 decoration: InputDecoration(
                   labelText: 'Latitude (ex.: -23.2)',
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0)),
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
                   filled: true,
                   fillColor: Colors.black12,
                 ),
@@ -124,15 +154,14 @@ class _LocationInputState extends State<LocationInput> {
                   return null;
                 },
               ),
-              const SizedBox(
-                height: 5,
-              ),
+              const SizedBox(height: 15),
               TextFormField(
                 controller: longController,
                 decoration: InputDecoration(
                   labelText: 'Longitude (ex.: -44.2)',
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0)),
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
                   filled: true,
                   fillColor: Colors.black12,
                 ),
@@ -162,75 +191,10 @@ class _LocationInputState extends State<LocationInput> {
                     double.parse(latController.text.replaceAll(',', '.'));
                 final long =
                     double.parse(longController.text.replaceAll(',', '.'));
-                final pointProvider =
-                    Provider.of<PointProvider>(context, listen: false);
-                pointProvider.updateCoordinates(lat, long);
-
-                setState(() {});
-
-                setState(() {
-                  _point.changeCoordinates(lat, long);
-                });
-                Navigator.pop(ctx);
+                _updateAndClose(ctx, lat, long);
               }
             },
             child: const Text('Confirm'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _checkConnectivityAndGPS() async {
-    try {
-      final connectivityResult = await Connectivity().checkConnectivity();
-      final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
-
-      if (connectivityResult == ConnectivityResult.none) {
-        throw 'No internet connection';
-      }
-
-      if (!isLocationEnabled) {
-        throw 'Location services are disabled';
-      }
-    } catch (e) {
-      _showNetworkErrorDialog(e.toString());
-      throw e; // Re-throw to prevent further execution
-    }
-  }
-
-  void _showNetworkErrorDialog(String error) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Connection Error'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(error),
-            const SizedBox(height: 10),
-            const Text('Would you like to:'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _showManualInputDialog();
-            },
-            child: const Text('Enter Manually'),
-          ),
-          TextButton(
-            onPressed: () async {
-              await Geolocator.openLocationSettings();
-              Navigator.pop(ctx);
-            },
-            child: const Text('Enable GPS'),
           ),
         ],
       ),
@@ -243,6 +207,17 @@ class _LocationInputState extends State<LocationInput> {
 
     return Column(
       children: [
+        if (pointProvider.lat != null && pointProvider.long != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Text(
+              'Lat: ${pointProvider.lat!.toStringAsFixed(4)}° - Long: ${pointProvider.long!.toStringAsFixed(4)}°',
+              style: TextStyle(
+                fontSize: 14,
+                color: const Color.fromARGB(255, 65, 59, 59),
+              ),
+            ),
+          ),
         Container(
           margin: const EdgeInsets.only(bottom: 6),
           height: 250,
