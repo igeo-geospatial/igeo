@@ -35,14 +35,31 @@ class ImageScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Data downloaded'),
-                  duration: Duration(seconds: 2),
-                ),
+            onPressed: () async {
+              final PermissionState status =
+                  await PhotoManager.requestPermissionExtend();
+              if (!status.isAuth) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Permissão negada')),
+                );
+                return;
+              }
+
+              final AssetEntity? entity =
+                  await PhotoManager.editor.saveImageWithPath(
+                imageUrl,
+                title: path.basename(
+                    imageUrl), // Usando a função basename do pacote path
               );
+
+              if (entity != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Saved in gallery'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              }
             },
             icon: const Icon(
               Icons.download,

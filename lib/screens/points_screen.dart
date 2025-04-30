@@ -131,14 +131,14 @@ class _PointsScreenState extends State<PointsScreen> {
               ),
             );
           },
-          child: const Text("Sim"),
+          child: const Text("Delete"),
         ),
         TextButton(
           onPressed: () {
             Navigator.of(context).pop();
             setState(() {});
           },
-          child: const Text("Não"),
+          child: const Text("Cancel"),
         ),
       ],
     );

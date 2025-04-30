@@ -78,7 +78,10 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       ),
     );
 
-    if (confirmed != true) return;
+    if (confirmed == false) {
+      setState(() {});
+      return;
+    }
 
     try {
       await DbUtils.deleteProjectPoints(projectId);
@@ -90,7 +93,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('project and all points deleted')),
+        const SnackBar(content: Text('Project and all points deleted')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
