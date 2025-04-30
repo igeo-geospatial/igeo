@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'dart:io';
 
 import '../models/point.dart';
 import '../models/project.dart';
@@ -52,7 +51,7 @@ class PointDetailScreen extends StatelessWidget {
             ),
             Text(
               "Point in ${project.name}",
-              style: TextStyle(color: Colors.white, fontSize: 14),
+              style: const TextStyle(color: Colors.white, fontSize: 14),
             ),
           ],
         ),
@@ -90,31 +89,33 @@ class PointDetailScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                   child: SizedBox(
                     height: 200,
-                    child: FlutterMap(
-                      options: MapOptions(
-                        center: LatLng(point.lat!, point.long!),
-                        zoom: 13.0,
-                      ),
-                      children: [
-                        TileLayer(
-                          urlTemplate:
-                              'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                          userAgentPackageName: 'com.example.app',
-                        ),
-                        MarkerLayer(
-                          markers: [
-                            Marker(
-                              point: LatLng(point.lat!, point.long!),
-                              builder: (ctx) => const Icon(
-                                Icons.location_pin,
-                                color: Colors.amber,
-                                size: 40,
-                              ),
+                    child: point.lat != 0
+                        ? FlutterMap(
+                            options: MapOptions(
+                              center: LatLng(point.lat!, point.long!),
+                              zoom: 13.0,
                             ),
-                          ],
-                        ),
-                      ],
-                    ),
+                            children: [
+                              TileLayer(
+                                urlTemplate:
+                                    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                                userAgentPackageName: 'com.example.app',
+                              ),
+                              MarkerLayer(
+                                markers: [
+                                  Marker(
+                                    point: LatLng(point.lat!, point.long!),
+                                    builder: (ctx) => const Icon(
+                                      Icons.location_pin,
+                                      color: Colors.amber,
+                                      size: 40,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )
+                        : const Center(child: Text("No location added")),
                   ),
                 ),
               ),
@@ -184,8 +185,10 @@ class PointDetailScreen extends StatelessWidget {
                                     color: Colors.amber,
                                   ),
                                   FittedBox(
-                                    child: Text(
-                                        " Lat: ${point.lat!.toStringAsFixed(6)} - Long: ${point.long!.toStringAsFixed(6)}"),
+                                    child: point.lat != 0
+                                        ? Text(
+                                            " Lat: ${point.lat!.toStringAsFixed(6)} - Long: ${point.long!.toStringAsFixed(6)}")
+                                        : const Text(" No location added"),
                                   ),
                                 ],
                               ),

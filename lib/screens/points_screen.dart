@@ -73,8 +73,8 @@ class _PointsScreenState extends State<PointsScreen> {
   Future postPoint(
     int projectId,
     String name,
-    double latitude,
-    double longitude,
+    double? latitude,
+    double? longitude,
     String date,
     String time,
     String description,
@@ -160,8 +160,8 @@ class _PointsScreenState extends State<PointsScreen> {
         postPoint(
           project.id,
           result.name!,
-          result.lat!,
-          result.long!,
+          result.lat,
+          result.long,
           result.date!,
           result.time!,
           result.description!,

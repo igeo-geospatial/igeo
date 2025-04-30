@@ -26,28 +26,28 @@ class _NewPointFormScreenState extends State<NewPointFormScreen> {
   void sendBackData(BuildContext context, Project project) {
     final pointProvider = Provider.of<PointProvider>(context, listen: false);
 
-    if (pointProvider.lat == null || pointProvider.long == null) {
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text('Missing Location'),
-          content: const Text('Please select a location before submitting'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
+    // if (pointProvider.lat == null || pointProvider.long == null) {
+    //   showDialog(
+    //     context: context,
+    //     builder: (ctx) => AlertDialog(
+    //       title: const Text('Missing Location'),
+    //       content: const Text('Please select a location before submitting'),
+    //       actions: [
+    //         TextButton(
+    //           onPressed: () => Navigator.pop(ctx),
+    //           child: const Text('OK'),
+    //         ),
+    //       ],
+    //     ),
+    //   );
+    //   return;
+    // }
 
     final newPoint = Point(
       name: _nameController.text,
       description: _descriptionController.text,
-      lat: pointProvider.lat!,
-      long: pointProvider.long!,
+      lat: pointProvider.lat,
+      long: pointProvider.long,
       date: DateFormat("d/M/yyyy").format(DateTime.now()),
       time: DateTime.now().toString().substring(10, 19),
       user_id: 1,

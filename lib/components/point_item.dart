@@ -86,8 +86,10 @@ class _PointItemState extends State<PointItem> {
                   color: Color.fromARGB(255, 7, 163, 221),
                 ),
               ),
-              Text(
-                  "Lat: ${widget.point.lat?.toStringAsFixed(2)} - Lon: ${widget.point.long?.toStringAsFixed(2)}"),
+              widget.point.lat != 0
+                  ? Text(
+                      "Lat: ${widget.point.lat?.toStringAsFixed(2)} - Lon: ${widget.point.long?.toStringAsFixed(2)}")
+                  : Text("No location"),
               const SizedBox(width: 3),
               // Container(
               //   margin: const EdgeInsets.only(right: 2),

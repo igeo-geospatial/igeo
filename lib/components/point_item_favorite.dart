@@ -68,8 +68,10 @@ class PointItemFavorite extends StatelessWidget {
                 color: Color.fromARGB(255, 7, 163, 221),
               ),
             ),
-            Text(
-                "Lat: ${point.lat!.toStringAsFixed(1)} - Lon: ${point.long!.toStringAsFixed(1)} - "),
+            point.lat != 0
+                ? Text(
+                    "Lat: ${point.lat!.toStringAsFixed(1)} - Lon: ${point.long!.toStringAsFixed(1)} - ")
+                : Text("No location "),
             Container(
               margin: const EdgeInsets.only(right: 2),
               child: const Icon(

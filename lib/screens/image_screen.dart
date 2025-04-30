@@ -40,7 +40,7 @@ class ImageScreen extends StatelessWidget {
                   await PhotoManager.requestPermissionExtend();
               if (!status.isAuth) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Permissão negada')),
+                  const SnackBar(content: Text('You should have permission')),
                 );
                 return;
               }
@@ -83,7 +83,7 @@ class ImageScreen extends StatelessWidget {
               await PhotoManager.requestPermissionExtend();
           if (!status.isAuth) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Permissão negada')),
+              const SnackBar(content: Text('You should have permission')),
             );
             return;
           }
