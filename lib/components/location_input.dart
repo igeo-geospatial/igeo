@@ -12,7 +12,7 @@ class LocationInput extends StatefulWidget {
 }
 
 class _LocationInputState extends State<LocationInput> {
-  final MapController _mapController = MapController();
+  late final MapController _mapController = MapController();
   final Point _point = Point(); // Initialize here instead of widget
 
   Future<void> _handleLocationPermission() async {
@@ -86,6 +86,97 @@ class _LocationInputState extends State<LocationInput> {
     );
   }
 
+  void _showManualInputDialog() {
+    final latController = TextEditingController();
+    final longController = TextEditingController();
+    final _formKey = GlobalKey<FormState>();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Enter Coordinates'),
+        content: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: latController,
+                decoration: InputDecoration(
+                  labelText: 'Latitude (ex.: -23.2)',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0)),
+                  filled: true,
+                  fillColor: Colors.black12,
+                ),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Required field';
+                  final cleaned = value.replaceAll(',', '.');
+                  final lat = double.tryParse(cleaned);
+                  if (lat == null) return 'Invalid number';
+                  if (lat < -90 || lat > 90) return 'Between -90 and 90';
+                  return null;
+                },
+              ),
+              const SizedBox(
+                height: 5,
+              ),
+              TextFormField(
+                controller: longController,
+                decoration: InputDecoration(
+                  labelText: 'Longitude (ex.: -44.2)',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0)),
+                  filled: true,
+                  fillColor: Colors.black12,
+                ),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Required field';
+                  final cleaned = value.replaceAll(',', '.');
+                  final long = double.tryParse(cleaned);
+                  if (long == null) return 'Invalid number';
+                  if (long < -180 || long > 180) return 'Between -180 and 180';
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                final lat =
+                    double.parse(latController.text.replaceAll(',', '.'));
+                final long =
+                    double.parse(longController.text.replaceAll(',', '.'));
+                final pointProvider =
+                    Provider.of<PointProvider>(context, listen: false);
+                pointProvider.updateCoordinates(lat, long);
+
+                setState(() {});
+
+                setState(() {
+                  _point.changeCoordinates(lat, long);
+                });
+                Navigator.pop(ctx);
+              }
+            },
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final pointProvider = Provider.of<PointProvider>(context);
@@ -130,24 +221,34 @@ class _LocationInputState extends State<LocationInput> {
                   ],
                 ),
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        Column(
           children: [
-            TextButton.icon(
-              onPressed: _getCurrentUserLocation,
-              icon:
-                  const Icon(Icons.location_on, size: 16, color: Colors.amber),
-              label: const Text("Get location",
-                  style: TextStyle(fontSize: 13, color: Colors.grey)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton.icon(
+                  onPressed: _getCurrentUserLocation,
+                  icon: const Icon(Icons.location_on,
+                      size: 16, color: Colors.amber),
+                  label: const Text("Get location",
+                      style: TextStyle(fontSize: 13, color: Colors.grey)),
+                ),
+                TextButton.icon(
+                  onPressed: _selectOnMap,
+                  icon: const Icon(Icons.map, size: 16, color: Colors.amber),
+                  label: const Text("Select on map",
+                      style: TextStyle(fontSize: 13, color: Colors.grey)),
+                ),
+              ],
             ),
             TextButton.icon(
-              onPressed: _selectOnMap,
-              icon: const Icon(Icons.map, size: 16, color: Colors.amber),
-              label: const Text("Select on map",
+              onPressed: _showManualInputDialog,
+              icon: const Icon(Icons.edit, size: 16, color: Colors.amber),
+              label: const Text("Enter coords. manually",
                   style: TextStyle(fontSize: 13, color: Colors.grey)),
             ),
           ],
-        ),
+        )
       ],
     );
   }

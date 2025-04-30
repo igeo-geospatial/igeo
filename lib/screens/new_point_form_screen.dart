@@ -42,6 +42,22 @@ class _NewPointFormScreenState extends State<NewPointFormScreen> {
     //   );
     //   return;
     // }
+    if (_nameController.text.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Required point name'),
+          content: const Text('Please enter a name for the point'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
 
     final newPoint = Point(
       name: _nameController.text,
@@ -101,7 +117,7 @@ class _NewPointFormScreenState extends State<NewPointFormScreen> {
                         fillColor: Colors.black12,
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty) {
+                        if (value!.isEmpty) {
                           return 'Please enter a point name';
                         }
                         return null;
