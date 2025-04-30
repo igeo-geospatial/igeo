@@ -3,6 +3,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+
 import '../screens/map_screen.dart';
 import '../models/point.dart';
 
@@ -31,6 +33,7 @@ class _LocationInputState extends State<LocationInput> {
   Future<void> _getCurrentUserLocation() async {
     try {
       await _handleLocationPermission();
+      await _checkConnectivityAndGPS();
       final position = await Geolocator.getCurrentPosition();
       _updatePosition(position.latitude, position.longitude);
       print("****************************** " + position.latitude.toString());
@@ -42,6 +45,7 @@ class _LocationInputState extends State<LocationInput> {
   Future<void> _selectOnMap() async {
     try {
       await _handleLocationPermission();
+      await _checkConnectivityAndGPS();
       final position = await Geolocator.getCurrentPosition();
       final initialPosition = LatLng(position.latitude, position.longitude);
 
@@ -171,6 +175,62 @@ class _LocationInputState extends State<LocationInput> {
               }
             },
             child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _checkConnectivityAndGPS() async {
+    try {
+      final connectivityResult = await Connectivity().checkConnectivity();
+      final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
+
+      if (connectivityResult == ConnectivityResult.none) {
+        throw 'No internet connection';
+      }
+
+      if (!isLocationEnabled) {
+        throw 'Location services are disabled';
+      }
+    } catch (e) {
+      _showNetworkErrorDialog(e.toString());
+      throw e; // Re-throw to prevent further execution
+    }
+  }
+
+  void _showNetworkErrorDialog(String error) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Connection Error'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(error),
+            const SizedBox(height: 10),
+            const Text('Would you like to:'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _showManualInputDialog();
+            },
+            child: const Text('Enter Manually'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await Geolocator.openLocationSettings();
+              Navigator.pop(ctx);
+            },
+            child: const Text('Enable GPS'),
           ),
         ],
       ),
