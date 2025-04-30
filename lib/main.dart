@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:igeo/screens/edit_point_screen.dart';
 import './models/point_list.dart';
 import './screens/new_point_form_screen.dart';
 import './screens/point_details_screen.dart';
@@ -52,6 +53,7 @@ class MyApp extends StatelessWidget {
           AppRoutes.HOME2: (ctx) => TabsScreen(),
           AppRoutes.NEW_POINT: (ctx) => NewPointFormScreen(),
           AppRoutes.POINT_DETAILS: (ctx) => PointDetailScreen(),
+          '/edit-point': (context) => const EditPointScreen(),
         },
       ),
     );

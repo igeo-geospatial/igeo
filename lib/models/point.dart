@@ -43,4 +43,17 @@ class Point with ChangeNotifier {
     this.long = long;
     notifyListeners();
   }
+
+  // Método toMap para conversão para formato de banco de dados
+  Map<String, dynamic> toMap() {
+    return {
+      'project_id': project_id,
+      'name': name,
+      'date': date,
+      'time': time,
+      'lat': lat,
+      'long': long,
+      'description': description,
+    };
+  }
 }

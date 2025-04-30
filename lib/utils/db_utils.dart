@@ -1,3 +1,4 @@
+import 'package:igeo/models/point.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart' as syspaths;
@@ -282,6 +283,16 @@ class DbUtils {
       'points',
       where: 'id = ?',
       whereArgs: [pointId],
+    );
+  }
+
+  static Future<int> updatePoint(Point point) async {
+    final db = await database();
+    return await db.update(
+      'points',
+      point.toMap(),
+      where: 'id = ? AND project_id = ?',
+      whereArgs: [point.id, point.project_id],
     );
   }
 
